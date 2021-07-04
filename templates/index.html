@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>FRSS</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/file.css') }}">
+
+    <style>
+        video#banner {
+            position: absolute !important;
+            z-index: 0 !important;
+            /* background: url(mel.jpg) no-repeat; */
+            background-size: 100% 100% !important;
+            top: 0px !important;
+            left: 0px !important;
+            /* fixed to left. Replace it by right if you want.*/
+            min-width: 100% !important;
+            min-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a href="http://127.0.0.1:5000/"><button class="btn btn-secondary" id="welcome"
+                style="display:block;float: right;color:white;margin-top:25px;margin-right: 20px;">Home</button></a>
+        {%if page=='home'%}
+        <div class="row">
+            <div class="col-lg-12">
+                <header class="text-center tm-site-header">
+                    <div class="tm-site-logo"></div>
+                    <h1 class="pl-4 tm-site-title">Welcome to FRSS</h1>
+                </header>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <form method="post" action="http://localhost:5000/choose" enctype="multipart/form-data">
+                    <div class="file-upload">
+                        <button class="file-upload-btn" type="submit">Upload</button>
+
+                        <div class="image-upload-wrap">
+                            <input class="file-upload-input" name="file_name" type='file' onchange="readURL(this);"
+                                accept="image/*,video/mp4" />
+                            <div class="drag-text">
+                                <h3>Drag and drop a video file</h3>
+                            </div>
+                        </div>
+                        <div class="file-upload-content">
+                            <!-- <img class="file-upload-image" src="#" alt="your image" /> -->
+                            <video id="tm-welcome-video" class="tm-welcome-video" autoplay="" loop="" muted=""
+                                id="banner">
+                                <source class="file-upload-image"
+                                    src="{{ url_for('static',filename='videos/sample.mp4') }}" type="video/mp4"> Your
+                                browser does not support the video tag.
+                            </video>
+                            <div class="image-title-wrap">
+                                <button type="button" onclick="removeUpload()" class="remove-image">Remove <span
+                                        class="image-title">Uploaded Image</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {%endif%}
+        <!-- </div> -->
+        {%if page == 'predict'%}
+        <div id="loaded">
+            <div class="row">
+                <div class="col-lg-12">
+                    <header class="text-center tm-site-header">
+                        <div class="tm-site-logo"></div>
+                        <h1 class="pl-4 tm-site-title">Video Processed Successfully &nbsp;&nbsp;</h1>
+                        <a href="http://localhost:5000/predict" onclick="showSpeech()"><button
+                                class="btn btn-primary">Show result</button></a>
+                    </header>
+                </div>
+            </div>
+
+            <div class="row" id="speech" style="display:none;margin-top: 50px;margin-bottom: 100px;">
+                <div class="col-lg-12">
+                    <div style="display: flex;justify-content: center;">
+                        <h3 class="tm-text-orange tm-font-400"> Invoking Speech Module..</h3><span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {%endif%}
+        {%if page == 'process'%}
+        <div class="row" id="process-ready">
+            <div class="col-lg-12">
+                <header class="text-center tm-site-header">
+                    <div class="tm-site-logo"></div>
+                    <h1 class="pl-4 tm-site-title">Ready To Process - </h1>
+                    <a href="http://localhost:5000/process" onclick="processing()"><button
+                            class="btn btn-primary">&nbsp;&nbsp;Process Now</button></a>
+                </header>
+            </div>
+        </div>
+        <div id="loaded-process" style="display:none;">
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <header class="text-center tm-site-header">
+                        <div class="tm-site-logo"></div>
+                        <h1 class="pl-4 tm-site-title">Processing -Please Wait... </h1>
+                        <!-- <a href="http://localhost:5000/process" onclick="processing()"><button class="btn btn-primary">&nbsp;&nbsp;Process Now</button></a> -->
+                    </header>
+                </div>
+                <div class="col-lg-12">
+                    <div class="tm-video-container">
+                        <video id="tm-welcome-video" class="tm-welcome-video" autoplay="" loop="" muted="" id="banner">
+                            <source src="{{ url_for('static',filename='videos/sample.mp4') }}" type="video/mp4"> Your
+                            browser does not support the video tag.
+                        </video>
+                        <div id="tm-video-loader"></div>
+                        <div id="tm-video-text-overlay" class="tm-video-text-overlay d-none">
+                            <h1>
+                                <div id="rotate" class="tm-video-text">
+                                    <div>This is FRSS</div>
+                                    <div>We are invincible</div>
+                                    <div>Quite unbeatable</div>
+                                    <div>and indestructible</div>
+                                </div>
+                            </h1>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {%endif%}
+
+        {%if page == 'result'%}
+        <div class="row" id="process-ready">
+            <div class="col-lg-12">
+                <header class="text-center tm-site-header">
+                    <div class="tm-site-logo"></div>
+                    <h1 class="pl-4 tm-site-title">{{name}}</h1>
+                    <!-- <a href="http://localhost:5000/process" onclick="processing()"><button class="btn btn-primary">&nbsp;&nbsp;Process Now</button></a> -->
+                </header>
+            </div>
+        </div>
+        <div id="loaded-process-result">
+
+            <div class="row">
+                {%if name == 'sabeena'%}
+                <!-- title sabeena -->
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/sabeena.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-orange tm-font-400">Sabeena</h3>
+                                <p>She is sabeena A .S. she is one of the assistant professor at University College of
+                                    engineering karyavattam.she is one of the finest trs that we have.</p>
+                                <p class="tm-text-orange float-right mb-0">Assistant Professor</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Title sabeena -->
+
+                <!-- title arun -->
+                {%elif name == 'arun'%}
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/arun.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-orange tm-font-400">Arun</h3>
+                                <p>His name is Arun B I. He is an assistant professor at University College of
+                                    engineering karyavattam.He is one of the best Teachers that we have.
+                                </p>
+                                <p class="tm-text-orange float-right mb-0">Assistant Professor</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Title arun -->
+
+                {%elif name == 'reshma'%}
+                <!-- title Reshma -->
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/reshma.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-orange tm-font-400">Reshma</h3>
+                                <p>Reshma R, she is one of the assistant professor at university college of engineering
+                                    kariavatton. She is the staff advisor of final year Information technology.</p>
+                                <p class="tm-text-orange float-right mb-0">Assistant Professor</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Title reshma -->
+
+                {%elif name == 'meharu'%}
+                <!-- title Mehru -->
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/mehru.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-orange tm-font-400">Mehru</h3>
+                                <p>Meharuniza nazzem . Assistant professor at University College of engineering
+                                    karyavattam.she is one of the pre-eminent trs that we have.</p>
+                                <p class="tm-text-orange float-right mb-0">Assistant Professor</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Title Mehru -->
+
+                {%else%}
+                <!-- title unknown -->
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/unknown.png') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-orange tm-font-400">Unknown</h3>
+                                <p>Sorry! I can't find details about this person. We will try to develop our knowledge
+                                    base on future updates.</p>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Title Unknown -->
+                {%endif%}
+            </div>
+        </div>
+
+        {%endif%}
+    </div>
+    <div class="container tm-container-2">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="tm-welcome-text">FRSS Process Time Line</h2>
+            </div>
+        </div>
+        <div class="row tm-section-mb">
+            <div class="col-lg-12">
+                <div class=" tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/img-01.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark tm-timeline-description">
+                                <h3 class="tm-text-green tm-font-400">Well trained model</h3>
+                                <p>Created a dataset which consist of the faces of our teachers.Then extract faces using MTCNN. Trained faces and saved embeddings.</p>
+                                <p class="tm-text-green float-right mb-0">Completed . 12 June 2021</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tm-timeline-connector-vertical"></div>
+                </div>
+
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/img-02.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-cyan tm-font-400">Predict Input Data</h3>
+                                <p>Process input video file and extract images from it using opencv. These images are processed and predicted using our model.</p>
+                                <p class="tm-text-cyan float-right mb-0">Completed . 17 June 2021</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tm-timeline-connector-vertical"></div>
+                </div>
+
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/img-03.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark tm-timeline-description">
+                                <h3 class="tm-text-yellow tm-font-400">Speech Synthesis</h3>
+                                <p>Unique identification string is passed to the speech synthesis unit. From there appropriate description of the person is feed into translation unit. Description is traslated to required langange and then speeks it out.
+                                </p>
+                                <p class="tm-text-yellow float-right mb-0">Completed . 19 June 2021</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tm-timeline-connector-vertical"></div>
+                </div>
+
+                <div class="tm-timeline-item">
+                    <div class="tm-timeline-item-inner">
+                        <img src="{{ url_for('static',filename='img/img-04.jpg') }}" alt="Image"
+                            class="rounded-circle tm-img-timeline">
+                        <div class="tm-timeline-connector">
+                            <p class="mb-0">&nbsp;</p>
+                        </div>
+                        <div class="tm-timeline-description-wrap">
+                            <div class="tm-bg-dark-light tm-timeline-description">
+                                <h3 class="tm-text-orange tm-font-400">Web Interface</h3>
+                                <p>Created a simple flask application. User can upload video files and view results from there.</p>
+                                <p class="tm-text-orange float-right mb-0">Completed . 22 June 2021</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <!--  row -->
+        <hr>
+        <div class="row tm-section-mb tm-section-mt">
+            <div class="col-lg-12 col-md-12">
+
+                <div style="text-align: center;">
+                    <h2 class="mt-2 mb-3 tm-text-gray"></h2>
+                    <img src="{{ url_for('static',filename='img/team.jpeg') }}" alt="Image"  class="rounded-circle tm-img-timeline"
+                        >
+                </div>
+            </div>
+           
+        </div>
+
+        <!-- Footer -->
+        <footer class="row mt-5 mb-5">
+            <div class="col-lg-12">
+                <p class="text-center tm-text-gray tm-copyright-text mb-0"> &copy;
+                    <span class="tm-current-year">2019</span> UCK
+
+                    | S8: <a href="#" class="tm-text-white">Information Technology</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+
+    <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+
+    <script src="{{ url_for('static',filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/file.js') }}"></script>
+
+</body>
+
+</html>
